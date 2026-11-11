@@ -6,6 +6,10 @@ name: GitHub Pages (Bible)
 # Este repositório é só vitrine — o motor não é copiado para cá.
 on:
   workflow_dispatch:
+  # Um único bootstrap em main: o token da CLI não consegue dar dispatch
+  # nem habilitar Pages. Depois do primeiro deploy este trigger some.
+  push:
+    branches: [main]
 
 permissions:
   contents: read
@@ -34,6 +38,18 @@ jobs:
         env:
           VITE_BASE: /BIBLE-PUZZLE-ADVENTURES/
         run: npm run build:bible
+      - name: Enable GitHub Pages (workflow)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s\n' '{"build_type":"workflow"}' | gh api --method POST "repos/${GITHUB_REPOSITORY}/pages" --input - \
+            || printf '%s\n' '{"build_type":"workflow"}' | gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" --input - \
+            || true
+      - uses: actions/configure-pages@v5
+        continue-on-error: true
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/bible-puzzle/dist
