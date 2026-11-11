@@ -1,0 +1,49 @@
+name: GitHub Pages (Bible)
+
+# NÃO publica automaticamente a cada push em main.
+# O dono do projeto dispara o deploy pelo Actions (Run workflow).
+# Fonte do app: monorepo NOSTALGIA-PUZZLE-90-S no tag bible-v0.1.0.
+# Este repositório é só vitrine — o motor não é copiado para cá.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Asilva-01/NOSTALGIA-PUZZLE-90-S
+          ref: bible-v0.1.0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build Bible com base do GitHub Pages
+        env:
+          VITE_BASE: /BIBLE-PUZZLE-ADVENTURES/
+        run: npm run build:bible
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/bible-puzzle/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
