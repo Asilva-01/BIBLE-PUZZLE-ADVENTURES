@@ -6,10 +6,6 @@ name: GitHub Pages (Bible)
 # Este repositório é só vitrine — o motor não é copiado para cá.
 on:
   workflow_dispatch:
-  # Um único bootstrap em main: o token da CLI não consegue dar dispatch
-  # nem habilitar Pages. Depois do primeiro deploy este trigger some.
-  push:
-    branches: [main]
 
 permissions:
   contents: read
